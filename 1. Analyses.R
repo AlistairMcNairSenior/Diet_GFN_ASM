@@ -24,18 +24,23 @@ library(doParallel)
 Sys.sleep(5)
 
 # Set the wd
-setwd("/Users/alistairsenior/Dropbox (Sydney Uni)/Work-Home Share/DECRA/Aim 3/Analyses Main Text")
+#setwd("/Users/alistairsenior/Dropbox (Sydney Uni)/Work-Home Share/DECRA/Aim 3/Analyses Main Text")
 
 # Functions written for these analyses
 source("0. Header_Functions.R")
 
+# Mouse self selected diets is poorly defined for fat Sorenson et al. give an estimate for P:C based on a diet around 7% fat. Solon-biet et al. using the half-life of an assymptotic curve give an estimate of the effect of diet macronutrient composition on feeding. Taking the average of these two estimates we get
+p_s<-0.2241
+c_s<-0.4706
+f_s<-0.3054
+
 # Figure 1 - conceptual figure for effects of alpha and beta on survival in population relative to stnadard 
 
 # Open the file for plotting
-pdf("Fig1.pdf", height=10, width=10)
+pdf("Fig1.pdf", height=9, width=9)
 
 # Set up the plotting region
-par(mfrow=c(2,2), mar=c(5,6,5,2))
+par(mfrow=c(2,2), mar=c(5,6,4,2), cex.lab=1.5)
 
 # Logit survival on the standard - assume simplistic relationship between 6 (close to 100%) and -6 (close to 0%)
 lsx<-seq(-6, 6, 1)
@@ -54,24 +59,26 @@ for(i in 1:4){
 	lx<-a[i] + b[i] * lsx
 	
 	# Plot the data
-	plot(lsx, lx, pch=16, xlab = expression(logit(italic(l[x]^s))), ylab=expression(logit(italic(l[x]))), ylim=c(-6, 6), xlim=c(-6, 6), cex.lab=1.25)
+	plot(lsx, lx, pch=16, xlab = expression(logit(italic(l[x]^s))), ylab=expression(logit(italic(l[x]))), ylim=c(-6, 6), xlim=c(-6, 6))
 	
 	# Add some reference lines
-	abline(v=0, lty=2)
-	abline(h=0, lty=2)
+	abline(v=0, lty=1, col="grey")
+	abline(h=0, lty=1, col="grey")
 	abline(a=0, b=1, lty=2)
+	
+	points(lsx, lx, pch=16)
 	
 	# Add the values to the panel
 	text(-5, 5, substitute(italic(alpha) == a, list(a = a[i])), cex=1.5)
 	text(-5, 4, substitute(italic(beta) == b, list(b = b[i])), cex=1.5)
-	mtext(labels[i], at=-6.5, line=2, cex=1.5)
+	mtext(labels[i], at=-7, line=1.5, cex=1.5)
 	
 	# Add some text to axis on panel A
 	if(i == 1){
 		mtext("survival at
-young ages", side=1, at = 4, line=3.5)
+young ages", side=1, at = 4, line=3.75)
 		mtext("survival at
-old ages", side=1, at = -4, line=3.5)
+old ages", side=1, at = -4, line=3.75)
 		mtext("survival at
 young ages", side=2, at = 4, line=3)
 		mtext("survival at
@@ -79,15 +86,9 @@ old ages", side=2, at = -4, line=3)
 	}
 }
 
-# Close the pdf
 dev.off()
 
 # Reading in data and some processing
-
-# Mouse self selected diets is poorly defined for fat Sorenson et al. give an estimate for P:C based on a diet around 7% fat. Solon-biet et al. using the half-life of an assymptotic curve give an estimate of the effect of diet macronutrient composition on feeding. Taking the average of these two estimates we get
-p_s<-0.2241
-c_s<-0.4706
-f_s<-0.3054
 
 # Read in the raw data
 raw.data<-read.csv("Raw_Mouse.csv")
@@ -115,21 +116,21 @@ write.table(summary.stats, file="Table.S1.csv", sep=",", row.names=F, col.names=
 
 # Figure 2 - visualise the standard life table and check how the model lifetables fit the data
 
-# Open the file for plotting
 pdf("Fig2.pdf", height=5, width=10)
 
-# Set up the plotting region
-par(mfrow=c(1,2), mar=c(5,5,3,2))
+par(mfrow=c(1, 2))
+par(mar=c(5, 5, 3, 2))
 
 # survival curve for whole dataset
 curve<-survfit(Surv(raw.data$ageatdeath_w) ~ 1)
-plot(curve, xlab="Age (weeks)", lwd=1.25)
-mtext(expression(italic(l[x])), side=2, line=2, cex=2)
+plot(curve, xlab="", lwd=1.5, col="grey")
+mtext(expression(italic(l[x])), side=2, line=2, cex=1.75)
+mtext("Age (Weeks)", side=1, line=3, cex=1.35)
 
 # Get the logit survival back for the whole population and plot
 standard<-brass_coefficients(ages_diet = raw.data$ageatdeath_w, ages_standard = raw.data$ageatdeath_w, return_standard = T)
-lines(standard$age, standard$lsx, col=2, lwd=1.5, lty=2)
-mtext("A", at=-1, line=1, cex=2)
+lines(standard$age, standard$lsx, col=1, lwd=1.5, lty=2)
+mtext("A", at=-1, line=1, cex=1.5)
 
 # The model on the dashed line (same as is fitted internally in the brass_coefficients function)
 outcome<-logit(curve$surv)[-length(curve$surv)]
@@ -150,27 +151,27 @@ for(i in 2:length(diets)){
 }
 
 # Plot the predicted vs observed
-plot(results$Observed, results$Predicted_Model, xlab=expression(Observed ~ italic(l[x])), ylab=expression(Predicted ~ italic(l[x])), cex.lab=1.2, pch=16, cex=0.5, ylim=c(0, 1), xlim=c(0, 1))
-mtext("B", at=-0.01, line=1, cex=2)
+plot(results$Observed, results$Predicted_Model, xlab=expression(Observed ~ italic(l[x])), ylab=expression(Predicted ~ italic(l[x])), pch=16, cex=0.5, ylim=c(0, 1), xlim=c(0, 1), cex.lab=1.25)
+mtext("B", at=-0.05, line=1, cex=1.5)
 abline(a=0, b=1)
 
 # Add on the r squared
 r2<-round(cor(results$Observed, results$Predicted_Model)^2, 2)
-text(0.1, 1, substitute(italic(r^2) == r2, list(r2 = r2)))
+text(0.15, 0.99, substitute(italic(r^2) == r2, list(r2 = r2)), cex=1.25)
 
 # Close the plotting file
 dev.off()
 
-# Figure 3 - GAM surfaces for alpha and beta
+# Figure 3 - GAM surfaces for alpha and beta and LE and SD in age at death
 
 # File for plotting
-pdf("Fig3.pdf", height=13, width=15)
+pdf("Fig3.pdf", height=20, width=11)
 
 # File to write results from each GAM too
 res.file<-"GAM_LS.csv"
 
 # Set up the plotting region
-par(mar=c(7,5,11,1), mfrow=c(2, 3))	
+par(mar=c(7,5,9,1), mfrow=c(4, 3))	
 
 # Specify the model formula to use (passed to GAM function)
 model.form<-as.formula("this.outcome ~ s(P_kJ.g, C_kJ.g, F_kJ.g, k = 10)")
@@ -312,12 +313,12 @@ for(k in 1:length(outcomes)){
 		contour(x.new, y.new, surf, add=TRUE, levels=pretty(range(mn,mx), nlev), labcex=1)
 
 		# Add a title to the middle panel
-		if(i == 2){mtext(titles[[k]], line=4, cex=5, font=2)}
+		if(i == 2){mtext(titles[[k]], line=1.5, cex=4, font=2)}
 		
 		# Add the labels	
-		mtext(labels[[i]][1], side=1, cex=1.25, line=3)
-		mtext(labels[[i]][2], side=2, cex=1.25, line=3)
-		mtext(paste(median(summary.stats[,surfaces.list[[i]][3]]), labels[[i]][3], sep=" "), side=1, cex=1, line=5)
+		mtext(labels[[i]][1], side=1, cex=1.5, line=3)
+		mtext(labels[[i]][2], side=2, cex=1.5, line=3)
+		mtext(paste("[", median(summary.stats[,surfaces.list[[i]][3]]), " ", labels[[i]][3], "]", sep=""), side=1, cex=1.25, line=5)
 		mtext(panels[[k]][i], side=2, cex=3, at=16, las=2)
 		
 		# Remove surf to be safe
@@ -336,61 +337,52 @@ for(k in 1:length(outcomes)){
 # Remove the "this.outcome" column
 summary.stats<-summary.stats[,-which(names(summary.stats) == "this.outcome")]
 
-# Close the plotting file
-dev.off()
 
-
-# Figure 4 - converting the predicted brass coefficients in figure 3 in to lifetables, and estimates of e3 (note for analytical purposes this is actually e0) and S
+# Figure 3 Lower Panels - converting the predicted brass coefficients in figure 3 in to lifetables, and estimates of e3 (note for analytical purposes this is actually e0) and S
 
 # Note this first step i slow as it requires a calculation for each data point on the surface (high resolution surfaces take longer to convert)
 
-# # We need to make sure we have the standard for estimation 
+# We need to make sure we have the standard for estimation 
 lsx<-brass_coefficients(ages_diet = raw.data$ageatdeath_w, ages_standard = raw.data$ageatdeath_w, return_standard = T)$lsx
 
-# Open a loop to run 3 times - once for each slice/surface - note I am using paralellisation here on a multicore machine
-registerDoParallel(3)
-conversion<-foreach(i = 1:3) %dopar% {
+# # Open a loop to run 3 times - once for each slice/surface - note I am using paralellisation here on a multicore machine
+# registerDoParallel(3)
+# conversion<-foreach(i = 1:3) %dopar% {
 	
-	# Grab an already formed plot to use a template and make e0 and SD matrices in to which calculated values will be added
-	e0<-plots.list[[1]][[i]]
-	SD<-e0
+	# # Grab an already formed plot to use a template and make e0 and SD matrices in to which calculated values will be added
+	# e0<-plots.list[[1]][[i]]
+	# SD<-e0
 	
-	# We only need to consider those values on the surface that are not NAs (make things a bit quicker)
-	calculate<-which(is.na(plots.list[[1]][[i]]) == F)
+	# # We only need to consider those values on the surface that are not NAs (make things a bit quicker)
+	# calculate<-which(is.na(plots.list[[1]][[i]]) == F)
 	
-	# Grab the alphas and betas on the ith slice
-	alphas<-plots.list[[1]][[i]][calculate]
-	betas<-plots.list[[2]][[i]][calculate]
+	# # Grab the alphas and betas on the ith slice
+	# alphas<-plots.list[[1]][[i]][calculate]
+	# betas<-plots.list[[2]][[i]][calculate]
 	
-	# Loop to run through each value
-	for(j in 1:length(calculate)){
+	# # Loop to run through each value
+	# for(j in 1:length(calculate)){
 		
-		# Convert the jth alpha and beta value to e0 and standard deviation, and add in to the corresponding location on the surface
-		e0[calculate[j]]<-convert_brass(alpha = alphas[j], beta = betas[j], lsx = lsx, age1 = 3, type = "e0")
-		SD[calculate[j]]<-convert_brass(alpha = alphas[j], beta = betas[j], lsx = lsx, age1 = 3, type = "S")
+		# # Convert the jth alpha and beta value to e0 and standard deviation, and add in to the corresponding location on the surface
+		# e0[calculate[j]]<-convert_brass(alpha = alphas[j], beta = betas[j], lsx = lsx, age1 = 3, type = "e0")
+		# SD[calculate[j]]<-convert_brass(alpha = alphas[j], beta = betas[j], lsx = lsx, age1 = 3, type = "S")
 
-	}
+	# }
 	
-	# Save e0 and SD
-	output<-list(e0, SD)
-	return(output)
+	# # Save e0 and SD
+	# output<-list(e0, SD)
+	# return(output)
 	
-}
+# }
 
-# The life expecs are the first object for each slice, and the SDs the second
-e0s<-list(conversion[[1]][[1]], conversion[[2]][[1]], conversion[[3]][[1]])
-SDs<-list(conversion[[1]][[2]], conversion[[2]][[2]], conversion[[3]][[2]])
-rm(conversion)
+# # The life expecs are the first object for each slice, and the SDs the second
+# e0s<-list(conversion[[1]][[1]], conversion[[2]][[1]], conversion[[3]][[1]])
+# SDs<-list(conversion[[1]][[2]], conversion[[2]][[2]], conversion[[3]][[2]])
+# rm(conversion)
 
-# Save the surfaces - they take so long to generate you dont want to loose them - I recommend commenting out this section after a successful run 
-save(e0s, file="Life_expectancy.Rdata")
-save(SDs, file="SD_Life_expectancy.Rdata")
-
-# Open the file for plotting
-pdf("Fig4.pdf", height=13, width=15)
-
-# Set the plotting region
-par(mar=c(7,5,11,1), mfrow=c(2, 3))	
+# #Save the surfaces - they take so long to generate you dont want to loose them - I recommend commenting out this section after a successful run 
+# save(e0s, file="Life_expectancy.Rdata")
+# save(SDs, file="SD_Life_expectancy.Rdata")
 
 # Reload the results, in case you are running this section independently
 load("Life_expectancy.Rdata")
@@ -408,8 +400,14 @@ outcomes[[2]]<-SDs
 
 # Some nice titles to add
 titles<-list()
-titles[[1]]<-expression(italic(e)[3])
-titles[[2]]<-expression(italic(s))
+titles[[1]]<-expression(italic(e)[3] - "Life Expectancy at 3 Weeks")
+titles[[2]]<-expression(italic(s) - "Standard Deviation in Age at Death")
+
+# Panel labels
+panels<-list()
+panels[[1]]<-c("C", "", "")
+panels[[2]]<-c("D", "", "")
+
 
 # Open the loop to makes the plots for each outcome
 for(k in 1:length(outcomes)){
@@ -450,13 +448,13 @@ for(k in 1:length(outcomes)){
 		contour(x.new, y.new, surf, add=TRUE, nlevels=nlev, labcex=1)
 
 		# Add a title to the middle panel
-		if(i == 2){mtext(titles[[k]], line=4, cex=5, font=2)}
+		if(i == 2){mtext(titles[[k]], line=2, cex=3, font=2)}
 		
 		# Add the labels	
-		mtext(labels[[i]][1], side=1, cex=1.25, line=3)
-		mtext(labels[[i]][2], side=2, cex=1.25, line=3)
-		mtext(paste(median(summary.stats[,surfaces.list[[i]][3]]), labels[[i]][3], sep=" "), side=1, cex=1, line=5)
-		mtext(panels[[k]][i], side=2, cex=3, at=16, las=2)
+		mtext(labels[[i]][1], side=1, cex=1.5, line=3)
+		mtext(labels[[i]][2], side=2, cex=1.5, line=3)
+		mtext(paste("[", median(summary.stats[,surfaces.list[[i]][3]]), " ", labels[[i]][3], "]", sep=""), side=1, cex=1.25, line=5)
+		mtext(panels[[k]][i], side=2, cex=3, at=17, las=2)
 		abline(a = 0, b = self.selected.diets[i], lwd=3, col=line.col)
 		
 		# find the isocaloric vector across the polygon on the surface - we dont want ratios that fall outside the area of the visualised surface
@@ -469,7 +467,7 @@ for(k in 1:length(outcomes)){
 		names(iso.vec.list[[i]])<-surfaces.list[[i]]
 		
 		# Add the points across the surface
-		points(iso.vec.list[[i]][,1], iso.vec.list[[i]][,2], pch=16, col="purple", cex=0.9)
+		lines(iso.vec.list[[i]][,1], iso.vec.list[[i]][,2], col="purple", lwd=3)
 		
 	}
 }
@@ -478,7 +476,7 @@ for(k in 1:length(outcomes)){
 dev.off()
 
 
-# Figures 5 through 7 - LTRE analysis. NOTE this step can be a bit slow as calculating the sensitivities is a bit slow
+# Figures 4 - LTRE analysis. NOTE this step can be a bit slow as calculating the sensitivities is a bit slow
 
 # We need to make sure we have the standard for estimation 
 lsx<-brass_coefficients(ages_diet = raw.data$ageatdeath_w, ages_standard = raw.data$ageatdeath_w, return_standard = T)$lsx
@@ -488,8 +486,8 @@ xlabs<-c("Protein / Carbohydrate", "Protein / Fat", "Carbohydrate / Fat")
 self_select<-c(p_s / c_s, p_s / f_s, c_s / f_s)
 
 # Some details about the size of plotting features
-line.width=2.5
-labels.size<-1.5
+line.width<-2.5
+labels.size<-c(1.5, 1.5, 1.5)
 
 # Coloration and breaks for the legends on the level plots
 breaks<-c(-1,-0.1,-0.01,-0.001,-0.0001,0.0001,0.001,0.01,0.1,1)
@@ -497,6 +495,15 @@ my.col<-cold.hot.colors(length(breaks)-1)
 color.labels<-as.character(round(breaks, 4))
 color.labels[c(3, 5, 6, 8)]<-""		
 
+# Panel labels
+panels<-list()
+panels[[1]]<-c("A", "B")
+panels[[2]]<-c("C", "D")
+panels[[3]]<-c("E", "F")
+panels.lab.size<-c(30, 30, 30)
+
+# Size of axis tick labels
+axis.tck.size<-c(1.25, 1.25, 1.25)
 
 # Open the loop to do analyses for each vector
 for(i in 1:length(iso.vec.list)){
@@ -545,10 +552,12 @@ for(i in 1:length(iso.vec.list)){
 		
 	# Now make the plot of change over the vector
 	plots.list[[1]]<-print(xyplot(delta_e0 ~ V1, data=change.data, 
-	xlim=range(change.data$V1), ylim=c(-25, 25), type="l", xlab="", ylab = list(label=expression(Delta), cex=labels.size), lwd=line.width, col="black",
-	scales=list(x=list(at=NULL)),
+	xlim=range(change.data$V1), ylim=c(-25, 25), type="l", xlab="", ylab = list(label=expression(Delta~~"(Change)"), cex=labels.size[i]), lwd=line.width, col="black",
+	scales=list(x=list(at=NULL), y=list(cex=axis.tck.size[i])),
 	key = list(space = "top", lines = list(col=c("black", "red"), lwd=line.width), cex=1.25, text = list(c(expression(italic(e[3])), expression(italic(s))))),
-	par.settings = list(layout.heights=list(xlab.key.padding = -3.1)),
+	par.settings = list(layout.heights=list(xlab.key.padding = -3.1, top.padding = 0.75),
+						layout.widths = list(ylab.axis.padding = 0.25)),
+	page = function(page) grid.text(panels[[i]][1], x = 0.05, y = 0.915, gp=gpar(fontsize = panels.lab.size[i])),
 	panel=function(...){
 		panel.xyplot(...)
 		panel.abline(h=0, lty=2, lwd=line.width)
@@ -557,7 +566,7 @@ for(i in 1:length(iso.vec.list)){
 	}))
 	
 	# Note these labels are useful for all plots
-	at.age<-seq(min(ages), max(ages), 10)
+	at.age<-seq(min(ages), max(ages), 20)
 	at.ratio<-round(seq(min(ratios), max(ratios), length = 5), 1)
 	
 	# Data for plotting change in ASM
@@ -572,11 +581,12 @@ for(i in 1:length(iso.vec.list)){
 	
 	# Make the level plot for delta q			
 	plots.list[[2]]<-print(levelplot(z ~ ratios * age | type, data = plot.data, at=breaks, col.regions=my.col, 
-	ylab=list(label = "Age", cex=labels.size), xlab=list(label=xlabs[i], cex=labels.size), 
+	ylab=list(label = "Age", cex=labels.size[i]), xlab=list(label=xlabs[i], cex=labels.size[i]), 
 	colorkey=FALSE,
-	scales=list(x=list(at=at.ratio, labels = at.ratio), y=list(at=at.age, labels=at.age)),
-	strip=strip.custom(factor.levels = c(expression(Delta~italic(q[x]))), par.strip.text=list(cex = 1.5)),
-	par.settings = list(layout.heights=list(strip=1.5, xlab.key.padding=3))))	
+	scales=list(x=list(at=at.ratio, labels = at.ratio, cex=axis.tck.size[i]), y=list(at=at.age, labels=at.age, cex=axis.tck.size[i])),
+	strip=strip.custom(factor.levels = c(expression(Delta~italic(q[x]) - "Change in ASM")), par.strip.text=list(cex = 1.5)),
+	par.settings = list(layout.heights=list(strip=1.5, xlab.key.padding=3)),
+	page = function(page) grid.text("", x = 0.05, y = 1, gp=gpar(fontsize = 30))))	
 			
 	# Get the differential for mortality over the vector	
 	dq_dv<-t(apply(q, 1, gradient))
@@ -616,18 +626,19 @@ for(i in 1:length(iso.vec.list)){
 	
 	# Make the plot	
 	plots.list[[3]]<-print(levelplot(z ~ ratios * age | type, data = plot.data, at=breaks, col.regions=my.col, layout=c(2,1),
-	ylab=list(label = "", cex=labels.size), xlab=list(label=xlabs[i], cex=labels.size),
-	colorkey=list(col=my.col, at=seq(-1, 10, length=length(breaks)), space = "top", labels=color.labels),
-	scales=list(x=list(at=at.ratio, labels = at.ratio), y=list(at=at.age, labels=at.age)),
-	strip=strip.custom(factor.levels = c(expression(contributions~to~italic(Delta~e)[3]), expression(contributions~to~italic(Delta~s))), par.strip.text=list(cex = 1.2)),
-	par.settings = list(layout.heights=list(strip=1.5, xlab.key.padding=3, top.padding = 0))))
+	ylab=list(label = "", cex=labels.size[i]), xlab=list(label=xlabs[i], cex=labels.size[i]),
+	colorkey=list(col=my.col, at=seq(-1, 10, length=length(breaks)), space = "top", labels=color.labels, cex=2),
+	scales=list(x=list(at=at.ratio, labels = at.ratio, cex=axis.tck.size[i]), y=list(at=at.age, labels=at.age, cex=axis.tck.size[i])),
+	strip=strip.custom(factor.levels = c(expression(Contributions~to~italic(Delta~e)[3]), expression(Contributions~to~italic(Delta~s))), par.strip.text=list(cex = 1.2)),
+	par.settings = list(layout.heights=list(strip=1.5, xlab.key.padding=3, top.padding = 0)),
+	page = function(page) grid.text(panels[[i]][2], x = 0.02, y = 0.91, gp=gpar(fontsize = panels.lab.size[i]))))
 	
 	# A few bits for plotting the key
-	x<-c(0.1, 0.3)
+	x<-c(0.05, 0.2)
 	y1<-c(0.75, 0.75)
 	y2<-c(0.5, 0.5)
 	y3<-c(0.25, 0.25)
-	text.size<-1.5
+	text.size<-1.25
 	
 	# Add the key
 	plots.list[[4]]<-print(xyplot(y1 ~ x, type="l", col="black", lwd=line.width, ylim=c(0, 1), xlim=c(0, 1), ylab="", xlab="", bty="n",
@@ -637,13 +648,13 @@ for(i in 1:length(iso.vec.list)){
 		panel.xyplot(...)
 		panel.lines(x, y3, col="grey", lwd=line.width)
 		panel.lines(x, y2, col="red", lwd=line.width)
-		panel.text(x[2]+0.05, y1[1], expression(italic(e[3])), cex=text.size, pos=4)
-		panel.text(x[2]+0.05, y2[1], expression(italic(s)), cex=text.size, pos=4)
-		panel.text(x[2]+0.05, y3[1], "self selected ratio", cex=text.size, pos=4)	
+		panel.text(x[2]+0.05, y1[1], expression(italic(e[3]) - "Life Expectancy at 3 Weeks"), cex=text.size, pos=4)
+		panel.text(x[2]+0.05, y2[1], expression(italic(s) - "Std. Dev. in Age at Death"), cex=text.size, pos=4)
+		panel.text(x[2]+0.05, y3[1], "Self-Selected Ratio", cex=text.size, pos=4)	
 	}))
 	
 	# Open the plotting file	
-	pdf(paste("Fig", i+4, ".pdf", sep=""), height=10, width=10)
+	pdf(paste("Fig4.", i, ".pdf", sep=""), height=10, width=10)
 	
 	# Lay it all out nicely
 	lattice.options(layout.heights=list(bottom.padding=list(x=0), top.padding=list(x=-4)))
