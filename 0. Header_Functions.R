@@ -1,4 +1,6 @@
 
+# Function to return a palette of hot cold colors that I think look good
+
 cold.hot.colors<-function(n.col){
 	
 	pallette<-rainbow(n.col, start = 3/6, end = 4/6, s = seq(0.005, 1, (0.995 / n.col))[1:n.col])
@@ -14,6 +16,7 @@ cold.hot.colors<-function(n.col){
 
 }
 
+# Function to return a paleltte with color similar to the classic colors from the fields package
 
 fields.colors<-function (n, alpha = 1) 
 {
@@ -34,6 +37,7 @@ fields.colors<-function (n, alpha = 1)
 
 
 # A function created to find the outer perimeter over which the surface should be fitted
+
 findConvex<-function(x,y,rgnames,res=101){
 	hull<-cbind(x,y)[chull(cbind(x,y)),]
 	px<-pretty(x)
@@ -46,6 +50,8 @@ findConvex<-function(x,y,rgnames,res=101){
 	names(Fgrid)<-rgnames
 	return(Fgrid)
 }
+
+# Function to find isocaloric vectors across a specfied polygon of intakes in nutrient space
 
 findIso<-function(intake.x, intake.y, iso.x, iso.y){
 	
@@ -140,7 +146,7 @@ brass_coefficients<-function(ages_diet, ages_standard, return_standard = F, retu
 } 
 x } 
 
-# Function to return sensitivity of index to mortality - from van Raalte and Caswell 2013
+# Function to return sensitivity of index to mortality - lifted from van Raalte and Caswell 2013 Demograph 50(5):1615-1640 Supp matts
 
 return_sensitivity<-function(q, x, type){
 	
@@ -247,6 +253,7 @@ return_sensitivity<-function(q, x, type){
     
 }    
 
+# Function to return and index calculated from life table parameters - it is a subset of the above code 
 
 return_index<-function(q, x, type){
 	
@@ -318,6 +325,7 @@ return_index<-function(q, x, type){
 	  
 }
 
+# Function to copnvert brass coefficients life expectancy or SD in age at death based on a standard pattern
 
 convert_brass<-function(alpha, beta, lsx, type = "e0", age1 = 0, return_lt = F){
 	
@@ -347,14 +355,6 @@ convert_brass<-function(alpha, beta, lsx, type = "e0", age1 = 0, return_lt = F){
 		}	
 	}
 		
-	return(out)
-}
-
-
-find_min_dist<-function(vector, search){
-	
-	edist<-sqrt((vector[1] - search[,1])^2 + (vector[2] - search[,2])^2)
-	out<-search[which(edist == min(edist, na.rm=T)),]
 	return(out)
 }
 
